@@ -12,7 +12,13 @@ class Item(Resource):
 
     @jwt_required()
     def get(self, name):
+        item = Item.find_by_name(name)
+        if item:
+            return item
+        return {'message': 'item não foi encontrado.'}, 404
 
+    @classmethod
+    def find_by_name(cls, name):
         connection = sqlite3.connect('../../data.db')
         cursor = connection.cursor()
 
@@ -24,15 +30,23 @@ class Item(Resource):
 
         if row:
             return {'item': {'name': row[0], 'price': row[1]}}
-        return {'message': 'item não foi encontrado.'}, 404
 
     def post(self, name):
-        if next(filter(lambda x: x['name'] == name, itens), None):
+        if Item.find_by_name(name):
             return {'message': 'Um item {} já esta cadastrado.'.format(name)}, 400
 
         data = Item.parser.parse_args()
         item = {'name': name, 'price': data['price']}
-        itens.append(itens)
+
+        connection =  sqlite3.connect('../../data.db')
+        cursor = connection.cursor()
+
+        query = 'INSERT INTO itens VLEUS (?, ?)'
+        cursor.execute(query, (item.get('name'), item.get('price')))
+
+        connection.commit()
+        connection.close()
+
         return item, 201
 
     @jwt_required()

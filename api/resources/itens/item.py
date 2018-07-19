@@ -26,7 +26,7 @@ class Item(Resource):
         item = ItemModel(name, data['price'])
 
         try:
-            item.insert_item()
+            item.save_to_db()
         except:
             return {'message': 'Ocorreu um erro ao inserir o item.'}, 500
 
@@ -34,27 +34,21 @@ class Item(Resource):
 
     @jwt_required()
     def delete(self, name):
-        try:
-            ItemModel.delete_item(name)
-            return {'message': 'Item foi excluido.'}
-        except:
-            return {'message': 'Erro ao excluir item.'}
+        item = ItemModel.find_by_name(name)
+        if item:
+            item.delete()
+
+        return {'message': 'Item deletado'}, 400
 
     def put(self, name):
         data = Item.parser.parse_args()
         item = ItemModel.find_by_name(name)
         if item is None:
             item = ItemModel(name, data['price'])
-            try:
-                item.insert_item()
-            except:
-                return {'message': 'Ocorreu um erro ao inserir o item.'}, 500
-
         else:
-            try:
-                item.update_item()
-            except:
-                return {'message': 'Ocorreu um erro ao editar o item.'}, 500
+            item.price = data['price']
+
+        item.save_to_db()
 
         return item.json()
 

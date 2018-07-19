@@ -29,15 +29,4 @@ class ItemModel(db.Model):
 
     @classmethod
     def list_itens(cls):
-        connection = sqlite3.connect('../../data.db')
-        cursor = connection.cursor()
-
-        query = 'SELECT * FROM itens'
-        rows = cursor.execute(query).fetchall()
-
-        itens = []
-        for row in rows:
-            item = {'name': row[0], 'price': row[1]}
-            itens.append(item)
-
-        return itens
+        return {'itens': list(map(lambda x: x.json(), ItemModel.query.all()))}

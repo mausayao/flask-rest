@@ -1,4 +1,3 @@
-import sqlite3
 from flask_restful import Resource, reqparse
 from api.models.user import User
 

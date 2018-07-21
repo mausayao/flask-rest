@@ -28,4 +28,4 @@ class StoreModel(db.Model):
 
     @classmethod
     def list_itens(cls):
-        return {'itens': list(map(lambda x: x.json(), Store.query.all()))}
+        return {'itens': list(map(lambda x: x.json(), cls.query.all()))}

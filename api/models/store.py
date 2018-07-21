@@ -1,23 +1,18 @@
 from condb import db
 
 
-class ItemModel(db.Model):
-    __tablename__ = 'itens'
+class StoreModel(db.Model):
+    __tablename__ = 'store'
     id = db.column(db.Integer, primary_key=True)
     name = db.column(db.String(80))
-    price = db.column(db.Float(precision=2))
 
-    store_id = db.column(db.Integer, db.ForeignKey('store.id'))
+    itens = db.relationship('ItemModel', lazy='dynamic')
 
-    store = db.relationship('StoreModel')
-
-    def __init__(self, name, price, store_id):
+    def __init__(self, name, price):
         self.name = name
-        self.price = price
-        self.store_id = store_id
 
     def json(self):
-        return {'name': self.name, 'price': self.price}
+        return {'name': self.name, 'itens': [item.json() for item in self.itens.all()]}
 
     @classmethod
     def find_by_name(cls, name):
@@ -33,4 +28,4 @@ class ItemModel(db.Model):
 
     @classmethod
     def list_itens(cls):
-        return {'itens': list(map(lambda x: x.json(), ItemModel.query.all()))}
+        return {'itens': list(map(lambda x: x.json(), Store.query.all()))}

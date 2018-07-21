@@ -10,6 +10,11 @@ class Item(Resource):
                         required=True,
                         help='Campo obrigatório.')
 
+    parser.add_argument('store_id',
+                        type=int,
+                        required=True,
+                        help='Store é obrigatório.')
+
     @jwt_required()
     def get(self, name):
         item = ItemModel.find_by_name(name)
@@ -23,7 +28,7 @@ class Item(Resource):
 
         data = Item.parser.parse_args()
 
-        item = ItemModel(name, data['price'])
+        item = ItemModel(name, data['price'], data['store_id'])
 
         try:
             item.save_to_db()
@@ -44,7 +49,7 @@ class Item(Resource):
         data = Item.parser.parse_args()
         item = ItemModel.find_by_name(name)
         if item is None:
-            item = ItemModel(name, data['price'])
+            item = ItemModel(name, data['price'], data['store_id'])
         else:
             item.price = data['price']
 

@@ -62,4 +62,4 @@ class ItemList(Resource):
 
     def get(self):
         itens = ItemModel.list_itens()
-        return {'item': itens}
+        return {'item': [item.json() for item in itens]}

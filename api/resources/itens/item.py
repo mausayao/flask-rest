@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_claims, jwt_optional, get_jwt_identity
 from api.models.item import ItemModel
 
 
@@ -39,6 +39,10 @@ class Item(Resource):
 
     @jwt_required
     def delete(self, name):
+        claims = get_jwt_claims()
+        if not claims['is_admin']:
+            return {'message': 'Você nao possui acesso.'}, 401
+
         item = ItemModel.find_by_name(name)
         if item:
             item.delete()
@@ -60,6 +64,14 @@ class Item(Resource):
 
 class ItemList(Resource):
 
+    @jwt_optional
     def get(self):
-        itens = ItemModel.list_itens()
-        return {'item': [item.json() for item in itens]}
+        user_id = get_jwt_identity()
+
+        itens = [item.json for item in ItemModel.list_itens()]
+        if user_id:
+            return {'itens': itens},
+        return {
+                   'item': [item['name'] for item in itens],
+                   'message': 'Há mais dados se você logar.'
+               }, 200

@@ -21,6 +21,12 @@ def create_tables():
 
 jwt = JWT(app)
 
+@jwt.user_claims_loader
+def add_claims_to_jwt(identity):
+    if identity == 1:
+        return {'is_admin': True}
+    return {'is_admin': False}
+
 api.add_resource(Item, '/item/<string:name>')
 api.add_resource(ItemList, '/itens')
 
@@ -30,7 +36,6 @@ api.add_resource(UserRes, '/user/<int:user_id>')
 api.add_resource(Store, '/store/<string:name>')
 api.add_resource(StoreList, '/stores')
 api.add_resource(UserLogin, '/login')
-
 
 if __name__ == '__main__':
     from condb import db

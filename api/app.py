@@ -2,7 +2,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_jwt import JWT
 from api.security import authenticate, identity
-from api.resources.users.user import UserRegister
+from api.resources.users.user import UserRegister, UserRes
 from api.resources.itens.item import Item, ItemList
 from api.resources.store.storeResource import Store, StoreList
 
@@ -25,9 +25,11 @@ api.add_resource(Item, '/item/<string:name>')
 api.add_resource(ItemList, '/itens')
 
 api.add_resource(UserRegister, '/register')
+api.add_resource(UserRes, '/user/<int:user_id>')
 
 api.add_resource(Store, '/store/<string:name>')
 api.add_resource(StoreList, '/stores')
+
 
 if __name__ == '__main__':
     from condb import db

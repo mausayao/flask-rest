@@ -1,9 +1,10 @@
 from flask import Flask, jsonify
 from flask_restful import Api
 from flask_jwt_extended import JWTManager as JWT
-from api.resources.users.user import UserRegister, UserRes, UserLogin, TokenRefresh
+from api.resources.users.user import UserRegister, UserRes, UserLogin, TokenRefresh, UserLogout
 from api.resources.itens.item import Item, ItemList
 from api.resources.store.storeResource import Store, StoreList
+from api.blacklist import BLACKLIST
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.bd'
@@ -40,11 +41,11 @@ def expired_token_callback():
 
 @jwt.token_in_blacklist_loader
 def check_if_token_in_blacklist(decrypted_token):
-    return decrypted_token['identity']
+    return decrypted_token['jti'] in BLACKLIST
 
 
 @jwt.invalid_token_loader
-def invalid_token_callback(errr):
+def invalid_token_callback(error):
     return jsonify({
         'description': 'Assinatura inválida',
         'error': 'invalid_token'
@@ -85,6 +86,7 @@ api.add_resource(Store, '/store/<string:name>')
 api.add_resource(StoreList, '/stores')
 api.add_resource(UserLogin, '/login')
 api.add_resource(TokenRefresh, '/refresh')
+api.add_resource(UserLogout, '/logout')
 
 if __name__ == '__main__':
     from condb import db

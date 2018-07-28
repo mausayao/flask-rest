@@ -1,21 +1,24 @@
 from flask_restful import Resource, reqparse
+from werkzeug.security import safe_str_cmp as equals
+from flask_jwt_extended import create_access_token, create_refresh_token
 from api.models.user import User
+
+_user_parser = reqparse.RequestParser()
+_user_parser.add_argument('username',
+                    type=str,
+                    required=True,
+                    help='Campo nao pode ser vazio.')
+
+_user_parser.add_argument('password',
+                    type=str,
+                    required=True,
+                    help='Campo nao pode ser vazio.')
 
 
 class UserRegister(Resource):
-    parser = reqparse.RequestParser()
-    parser.add_argument('username',
-                        type=str,
-                        required=True,
-                        help='Campo nao pode ser vazio.')
-
-    parser.add_argument('password',
-                        type=str,
-                        required=True,
-                        help='Campo nao pode ser vazio.')
 
     def post(self):
-        data = UserRegister.parser.parse_args()
+        data = _user_parser.parser.parse_args()
 
         user = User.find_by_username(data['username'])
         if user:
@@ -32,7 +35,7 @@ class UserRes(Resource):
     def get(cls, user_id):
         user = User.find_by_id(user_id)
         if not user:
-            return {'message': 'Usuário não foi encontrado.'},404
+            return {'message': 'Usuário não foi encontrado.'}, 404
         return user.json()
 
     @classmethod
@@ -42,3 +45,22 @@ class UserRes(Resource):
             return {'message': 'Usuário não foi encontrado.'}, 404
         user.delete_from_db()
         return {'message': 'Usuário foi deletado.'}
+
+
+class UserLogin(Resource):
+
+    @classmethod
+    def post(cls):
+        data = _user_parser.parser.parse_args()
+
+        user = User.find_by_username(data['username'])
+        if user and equals(user.password, data['password']):
+            access_token = create_access_token(identity=user.id, fresh=True)
+            refresh_token = create_refresh_token(user.id)
+
+            return {
+                       'access_token': access_token,
+                       'refresh_token': refresh_token
+                   }, 200
+
+        return {'message': 'Usuário ou senha inválido'}, 401

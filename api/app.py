@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager as JWT
-from api.resources.users.user import UserRegister, UserRes, UserLogin
+from api.resources.users.user import UserRegister, UserRes, UserLogin, TokenRefresh
 from api.resources.itens.item import Item, ItemList
 from api.resources.store.storeResource import Store, StoreList
 
@@ -36,6 +36,7 @@ api.add_resource(UserRes, '/user/<int:user_id>')
 api.add_resource(Store, '/store/<string:name>')
 api.add_resource(StoreList, '/stores')
 api.add_resource(UserLogin, '/login')
+api.add_resource(TokenRefresh, '/refresh')
 
 if __name__ == '__main__':
     from condb import db
